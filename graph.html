@@ -159,9 +159,60 @@ var edges = new vis.DataSet([{       from: 1, to: 2, arrows: "to",
   };
   
 var network = new vis.Network(container, data, options);
+var res_container = document.getElementById('all_information');
 
+network.on( 'click', function(properties) {
+    var clickedNodes = nodes.get(properties.nodes);
+    var clickedEdges = edges.get(properties.edges);    
+    //определение типа объекта (вершина/ребро) на котором произошло событие
+    var clickedObject = clickedNodes.length==0 ? clickedEdges[0] : clickedNodes[0];
+    var count_by_timeperiod = clickedObject['count_by_timeperiod'];
 
+    var cbp_labels = Object.keys(count_by_timeperiod); // total sum by timeperiod
+    var cbp_values = Object.values(count_by_timeperiod); 
+    showChart('myChart', cbp_labels, cbp_values, "Разбивка ДЗ по длительности"); 
+});
 
+function showChart(canvas_id, labels_list, values_list, legend){
+  //удаляем элемент, чтобы очистить контекст
+  var elem = document.getElementById(canvas_id);
+  if (elem!=null){
+    elem.remove(elem);
+  }
+  //создаём элемент заново, чтобы забрать контекст заново
+  let canvas = document.createElement('canvas');
+  canvas.setAttribute('id',canvas_id);
+  canvas.style.width = "500px";
+  canvas.style.height = "300px";
+  res_container.append(canvas);
+  var element = document.getElementById(canvas_id);
+  var ctx = element.getContext('2d');
+  var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: labels_list,
+        datasets: [{
+            label: legend,
+            data: values_list,
+            borderWidth: 1
+        }]
+    },
+    options: {
+      responsive:false,
+        legend: {display: false},
+        title: {
+            display: true,
+            text: legend,
+            position: 'top',
+            fontSize: 16,
+            padding: 0
+        },
+        scales: {
+            yAxes: [{ticks: {min: 0}}]
+        }
+    }
+}); 
+}
 </script>
 </body>
 </html>
